@@ -1,5 +1,6 @@
 import { Server } from 'socket.io'
 import { corsOptions } from './config/cors.js'
+import logger from './config/logger.js'
 
 let io
 
@@ -9,9 +10,9 @@ export const initSocket = (httpServer) => {
   })
 
   io.on('connection', (socket) => {
-    console.log(`Client connecté : ${socket.id}`)
+    logger.info(`Socket connecté : ${socket.id}`)
     socket.on('disconnect', () => {
-      console.log(`Client déconnecté : ${socket.id}`)
+      logger.info(`Socket déconnecté : ${socket.id}`)
     })
   })
 
