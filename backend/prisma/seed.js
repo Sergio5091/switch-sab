@@ -47,6 +47,7 @@ async function main() {
     update: {},
     create: {
       pseudo: 'superadmin',
+      email: 'superadmin@switchsab.local',
       telephone: '+22900000000',
       motDePasse: hash('super123'),
       role: 'SUPERADMIN',
@@ -59,6 +60,7 @@ async function main() {
     update: {},
     create: {
       pseudo: 'admin',
+      email: 'admin@switchsab.local',
       telephone: '+22900000001',
       motDePasse: hash('admin123'),
       role: 'ADMIN',
@@ -71,6 +73,7 @@ async function main() {
     update: {},
     create: {
       pseudo: 'gerant1',
+      email: 'gerant1@switchsab.local',
       telephone: '+22900000002',
       motDePasse: hash('gerant123'),
       role: 'GERANT',
@@ -84,6 +87,7 @@ async function main() {
     update: {},
     create: {
       pseudo: 'gerant2',
+      email: 'gerant2@switchsab.local',
       telephone: '+22900000003',
       motDePasse: hash('gerant123'),
       role: 'GERANT',

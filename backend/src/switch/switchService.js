@@ -11,10 +11,8 @@
  * C'est ce fichier qui décide.
  */
 
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '../services/prismaClient.js'
 import { mockAllumer, mockEteindre, mockGetStatut, mockGetStatuts } from './mockSwitch.js'
-
-const prisma = new PrismaClient()
 
 // ─── DRIVERS ──────────────────────────────────────────────────────────────────
 // Chaque driver expose la même interface : { allumer, eteindre, getStatut, getStatuts }

@@ -3,6 +3,9 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { corsOptions } from './config/cors.js'
 import switchRoutes from './routes/switch.routes.js'
+import authRoutes from './routes/auth.routes.js'
+import superAdminRoutes from './routes/superadmin.routes.js'
+import licenceRoutes from './routes/licence.routes.js'
 import logger from './config/logger.js'
 
 dotenv.config()
@@ -23,6 +26,9 @@ app.get('/', (req, res) => {
 })
 
 // ─── Routes switch (mock + futur vrai switch) ─────────────────────────────────
+app.use('/auth', authRoutes)
+app.use('/superadmin', superAdminRoutes)
+app.use('/licences', licenceRoutes)
 app.use('/switch', switchRoutes)
 
 // Les autres routes viendront ici
