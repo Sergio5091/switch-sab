@@ -44,16 +44,16 @@ export default function SuperAdminAdmins() {
 
   function openEdit(u: Utilisateur) {
     setEditing(u);
-    form.reset({ nom: u.nom, prenom: u.prenom, email: u.email, phone: u.phone, salleId: String(u.salleId) });
+    form.reset({ nom: u.nom, prenom: u.prenom, email: u.email, phone: u.telephone, salleId: String(u.salleId) });
     setOpen(true);
   }
 
   function onSubmit(values: FormValues) {
     if (editing) {
-      updateUtilisateur(editing.id, { ...values, salleId: Number(values.salleId) });
+      updateUtilisateur(editing.id, { ...values, salleId: Number(values.salleId), telephone: values.phone, active: values.actif });
       toast({ title: "Admin mis à jour" });
     } else {
-      addUtilisateur({ ...values, salleId: Number(values.salleId), role: "ADMIN", pseudo: values.email.split("@")[0], actif: true, password: "admin123" });
+      addUtilisateur({ ...values, salleId: Number(values.salleId), role: "ADMIN", motDePasse: "admin123", telephone: values.phone });
       toast({ title: "Admin créé", description: "Mot de passe par défaut : admin123" });
     }
     setOpen(false);

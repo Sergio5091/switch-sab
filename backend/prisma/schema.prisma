@@ -53,6 +53,7 @@ model Salle {
   categories  Categorie[]
   promos      Promo[]
   licences    Licence[]
+  coupons     Coupon[]
 }
 
 // ─── USER ─────────────────────────────────────────────
@@ -85,6 +86,7 @@ model User {
 model Categorie {
   id      Int    @id @default(autoincrement())
   nom     String
+  couleur String @default("#3B82F6")
   salleId Int
 
   salle   Salle   @relation(fields: [salleId], references: [id])
@@ -108,10 +110,14 @@ model Duree {
 // ─── POSTE ───────────────────────────────────────────
 model Poste {
   id          Int         @id @default(autoincrement())
-  nom         String
+  numero      Int
+  nom         String?
   image       String?
   statut      StatutPoste @default(LIBRE)
+  actif       Boolean     @default(true)
+  typeSwitch  String      @default("WIFI")
   categorieId Int
+  salleId     Int
 
   categorie Categorie @relation(fields: [categorieId], references: [id])
   sessions  Session[]
@@ -154,6 +160,7 @@ model Credit {
 model Transaction {
   id        Int              @id @default(autoincrement())
   clientId  Int
+  salleId   Int
   montant   Float
   type      TypeTransaction
   date      DateTime         @default(now())
@@ -167,8 +174,12 @@ model Coupon {
   id        Int      @id @default(autoincrement())
   code      String   @unique
   valeur    Float
+  salleId   Int
   utilise   Boolean  @default(false)
+  utilisePar Int?
   createdAt DateTime @default(now())
+
+  salle Salle? @relation(fields: [salleId], references: [id])
 }
 
 // ─── LICENCE ─────────────────────────────────────────

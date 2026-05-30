@@ -6,6 +6,8 @@ import switchRoutes from './routes/switch.routes.js'
 import authRoutes from './routes/auth.routes.js'
 import superAdminRoutes from './routes/superadmin.routes.js'
 import licenceRoutes from './routes/licence.routes.js'
+import adminRoutes from './routes/admin.routes.js'
+import gerantRoutes from './routes/gerant.routes.js'
 import logger from './config/logger.js'
 
 dotenv.config()
@@ -25,13 +27,14 @@ app.get('/', (req, res) => {
   res.json({ message: 'Switch SAB API opérationnelle ✅' })
 })
 
-// ─── Routes switch (mock + futur vrai switch) ─────────────────────────────────
+// ─── Routes ───────────────────────────────────────────────────────────────
 app.use('/auth', authRoutes)
 app.use('/superadmin', superAdminRoutes)
+app.use('/admin', adminRoutes)
+app.use('/gerant', gerantRoutes)
 app.use('/licences', licenceRoutes)
 app.use('/switch', switchRoutes)
 
 // Les autres routes viendront ici
-// app.use('/auth', authRoutes)
 
 export default app

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,39 +19,63 @@ const schema = z.object({
   ville: z.string().min(2, "Ville requise"),
   quartier: z.string().min(2, "Quartier requis"),
   telephone: z.string().min(8, "Téléphone requis"),
+  switchType: z.enum(["WIFI", "USB"]),
+  switchConfig: z.string().optional(),
 });
 type FormValues = z.infer<typeof schema>;
 
 export default function SuperAdminSalles() {
-  const { salles, addSalle, updateSalle, deleteSalle, licences } = useApp();
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<Salle | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+   const { salles, addSalle, updateSalle, deleteSalle } = useApp();
+   const { toast } = useToast();
+   const [open, setOpen] = useState(false);
+   const [editing, setEditing] = useState<Salle | null>(null);
+   const [deleteId, setDeleteId] = useState<number | null>(null);
+   const [switchType, setSwitchType] = useState<"WIFI" | "USB">("WIFI");
+   const [switchConfig, setSwitchConfig] = useState("");
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "" },
-  });
+   function getDaysRemaining(fin: string | Date | undefined): number {
+     if (!fin) return 0;
+     const expiryDate = new Date(fin);
+     const now = new Date();
+     if (expiryDate < now) return 0;
+     return Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+   }
+
+   const form = useForm<FormValues>({
+     resolver: zodResolver(schema),
+     defaultValues: { nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "", switchType: "WIFI", switchConfig: "" },
+   });
 
   function openCreate() {
     setEditing(null);
-    form.reset({ nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "" });
+    setSwitchType("WIFI");
+    setSwitchConfig("");
+    form.reset({ nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "", switchType: "WIFI", switchConfig: "" });
     setOpen(true);
   }
 
   function openEdit(s: Salle) {
     setEditing(s);
-    form.reset({ nom: s.nom, pays: s.pays, ville: s.ville, quartier: s.quartier, telephone: s.telephone });
+    setSwitchType((s.switchType as "WIFI" | "USB") || "WIFI");
+    setSwitchConfig(s.switchConfig || "");
+    form.reset({ 
+      nom: s.nom, 
+      pays: s.pays, 
+      ville: s.ville, 
+      quartier: s.quartier, 
+      telephone: s.telephone,
+      switchType: (s.switchType as "WIFI" | "USB") || "WIFI",
+      switchConfig: s.switchConfig || "",
+    });
     setOpen(true);
   }
 
   function onSubmit(values: FormValues) {
     if (editing) {
-      updateSalle(editing.id, { ...values, licenceExpiry: editing.licenceExpiry, adminId: editing.adminId });
+      updateSalle(editing.id, values);
       toast({ title: "Salle mise à jour" });
     } else {
-      addSalle({ ...values, licenceExpiry: "", adminId: 0 });
+      addSalle(values);
       toast({ title: "Salle créée" });
     }
     setOpen(false);
@@ -76,8 +101,9 @@ export default function SuperAdminSalles() {
 
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="divide-y divide-border">
-            {salles.map(salle => {
-              const lic = licences.find(l => l.salleId === salle.id);
+{salles.map(salle => {
+               const lic = (salle as any).licences?.find((l: any) => l.actif !== false);
+               const daysRemaining = lic ? getDaysRemaining(lic.fin) : 0;
               return (
                 <div key={salle.id} className="flex items-center gap-4 px-5 py-4" data-testid={`row-salle-${salle.id}`}>
                   <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
@@ -94,10 +120,12 @@ export default function SuperAdminSalles() {
                       </span>
                     </div>
                   </div>
-                  {lic && (
-                    <Badge className={lic.joursRestants <= 7 ? "bg-destructive/10 text-destructive border-destructive/20 text-xs" : lic.joursRestants <= 30 ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-xs" : "bg-green-500/10 text-green-400 border-green-500/20 text-xs"}>
-                      {lic.joursRestants}j restants
+                  {lic ? (
+                    <Badge className={daysRemaining <= 7 ? "bg-destructive/10 text-destructive border-destructive/20 text-xs" : daysRemaining <= 30 ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-xs" : "bg-green-500/10 text-green-400 border-green-500/20 text-xs"}>
+                      {daysRemaining}j restants
                     </Badge>
+                  ) : (
+                    <Badge className="bg-muted text-muted-foreground text-xs">Aucune licence</Badge>
                   )}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Button variant="ghost" size="sm" onClick={() => openEdit(salle)} data-testid={`button-edit-salle-${salle.id}`}>
@@ -132,6 +160,68 @@ export default function SuperAdminSalles() {
                     )}
                   />
                 ))}
+                
+                {/* Switch Type Selection */}
+                <FormField control={form.control} name="switchType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type de Switch</FormLabel>
+                      <Select value={field.value} onValueChange={(value) => {
+                        field.onChange(value);
+                        setSwitchType(value as "WIFI" | "USB");
+                      }}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="WIFI">WIFI</SelectItem>
+                          <SelectItem value="USB">USB</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {/* Conditional Switch Config Input */}
+                {switchType === 'WIFI' && (
+                  <FormField control={form.control} name="switchConfig"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adresse IP</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field}
+                            placeholder="Adresse IP (ex: 192.168.1.100)"
+                            data-testid="input-switchConfig-wifi"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                
+                {switchType === 'USB' && (
+                  <FormField control={form.control} name="switchConfig"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Port COM</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field}
+                            placeholder="Port COM (ex: COM3 ou /dev/ttyUSB0)"
+                            data-testid="input-switchConfig-usb"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                
                 <DialogFooter>
                   <Button type="submit" data-testid="button-submit-salle">{editing ? "Mettre à jour" : "Créer"}</Button>
                 </DialogFooter>

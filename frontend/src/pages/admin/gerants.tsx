@@ -51,7 +51,7 @@ export default function AdminGerants() {
       updateUtilisateur(editing.id, values);
       toast({ title: "Gérant mis à jour" });
     } else {
-      addUtilisateur({ ...values, salleId, role: "GERANT", pseudo: values.email.split("@")[0], password: "admin123" });
+      addUtilisateur({ ...values, salleId, role: "GERANT", pseudo: values.email.split("@")[0], motDePasse: "admin123" });
       toast({ title: "Gérant créé", description: "Mot de passe : admin123" });
     }
     setOpen(false);

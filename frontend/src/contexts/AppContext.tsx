@@ -34,6 +34,7 @@ export interface Salle {
   switchType?: string;
   switchConfig?: string;
   users?: Utilisateur[];
+  licences?: Licence[];
 }
 
 export interface Categorie {
@@ -258,75 +259,78 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     loadCurrentUser();
   }, []);
 
-  // Charger les données initiales
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setError(null);
-        if (!currentUser) return;
+// Charger les données initiales en fonction du rôle
+   useEffect(() => {
+     const loadData = async () => {
+       try {
+         setError(null);
+         if (!currentUser) return;
 
-        // Charger les salles
-        const sallesData = await salleService.getAll();
-        setSalles(sallesData);
+         // SUPERADMIN: Charger les salles et les utilisateurs (admins)
+         if (currentUser.role === "SUPERADMIN") {
+           const [sallesData, utilisateursData] = await Promise.allSettled([
+             salleService.getAll(),
+             adminService.getAll(),
+           ]);
 
-        // Charger les utilisateurs (admins)
-        try {
-          const utilisateursData = await adminService.getAll();
-          setUtilisateurs(utilisateursData);
-        } catch {
-          // Les utilisateurs peuvent ne pas être accessibles selon le rôle
-        }
+           if (sallesData.status === "fulfilled") {
+             setSalles(sallesData.value);
+             const allLicences = sallesData.value.flatMap((s: any) => s.licences || []);
+             setLicences(allLicences);
+           }
+           if (utilisateursData.status === "fulfilled") setUtilisateurs(utilisateursData.value);
+         }
+         // ADMIN: Charger les données de sa salle (catégories, durées, postes, coupons, promotions, configs)
+         else if (currentUser.role === "ADMIN") {
+           const userSalleId = currentUser.salleId;
+           if (userSalleId) {
+             const [categoriesData, dureesPrixData, postesData, couponsData, promotionsData, bonusConfigData, promoConfigData] =
+               await Promise.allSettled([
+                 categorieService.getAll(userSalleId),
+                 dureePrixService.getAll(userSalleId),
+                 posteService.getAll(userSalleId),
+                 couponService.getAll(userSalleId),
+                 promotionService.getAll(userSalleId),
+                 bonusConfigService.get(userSalleId),
+                 promoConfigService.get(userSalleId),
+               ]);
 
-        // Charger les données spécifiques à la salle de l'utilisateur
-        const userSalleId = currentUser.salleId;
-        if (userSalleId) {
-          const [categoriesData, dureesPrixData, postesData, clientsData, sessionsData, rechargesData, couponsData, licencesData, promotionsData] =
-            await Promise.allSettled([
-              categorieService.getAll(userSalleId),
-              dureePrixService.getAll(userSalleId),
-              posteService.getAll(userSalleId),
-              clientService.getAll(userSalleId),
-              sessionService.getAll(userSalleId),
-              rechargeService.getAll(userSalleId),
-              couponService.getAll(userSalleId),
-              licenceService.getAll(userSalleId),
-              promotionService.getAll(userSalleId),
-            ]);
+             if (categoriesData.status === "fulfilled") setCategories(categoriesData.value);
+             if (dureesPrixData.status === "fulfilled") setDureesPrix(dureesPrixData.value);
+             if (postesData.status === "fulfilled") setPostes(postesData.value);
+             if (couponsData.status === "fulfilled") setCoupons(couponsData.value);
+             if (promotionsData.status === "fulfilled") setPromotions(promotionsData.value);
+             if (bonusConfigData.status === "fulfilled") setBonusConfigs([bonusConfigData.value]);
+             if (promoConfigData.status === "fulfilled") setPromoConfigs([promoConfigData.value]);
+           }
+         }
+         // GÉRANT: Charger les données de sa salle (clients, sessions, recharges, coupons)
+         else if (currentUser.role === "GERANT") {
+           const userSalleId = currentUser.salleId;
+           if (userSalleId) {
+             const [clientsData, sessionsData, rechargesData, couponsData] = await Promise.allSettled([
+               clientService.getAll(userSalleId),
+               sessionService.getAll(userSalleId),
+               rechargeService.getAll(userSalleId),
+               couponService.getAll(userSalleId),
+             ]);
 
-          if (categoriesData.status === "fulfilled") setCategories(categoriesData.value);
-          if (dureesPrixData.status === "fulfilled") setDureesPrix(dureesPrixData.value);
-          if (postesData.status === "fulfilled") setPostes(postesData.value);
-          if (clientsData.status === "fulfilled") setClients(clientsData.value);
-          if (sessionsData.status === "fulfilled") setSessions(sessionsData.value);
-          if (rechargesData.status === "fulfilled") setRecharges(rechargesData.value);
-          if (couponsData.status === "fulfilled") setCoupons(couponsData.value);
-          if (licencesData.status === "fulfilled") setLicences(licencesData.value);
-          if (promotionsData.status === "fulfilled") setPromotions(promotionsData.value);
+             if (clientsData.status === "fulfilled") setClients(clientsData.value);
+             if (sessionsData.status === "fulfilled") setSessions(sessionsData.value);
+             if (rechargesData.status === "fulfilled") setRecharges(rechargesData.value);
+             if (couponsData.status === "fulfilled") setCoupons(couponsData.value);
+           }
+         }
+         // CLIENT: Pas de chargement de données globales (données chargées page par page)
+       } catch (err) {
+         const message = err instanceof Error ? err.message : "Erreur lors du chargement des données";
+         setError(message);
+         console.error("Erreur lors du chargement des données:", err);
+       }
+     };
 
-          // Charger les configurations
-          try {
-            const bonusConfigData = await bonusConfigService.get(userSalleId);
-            setBonusConfigs([bonusConfigData]);
-          } catch {
-            // Configuration peut ne pas exister
-          }
-
-          try {
-            const promoConfigData = await promoConfigService.get(userSalleId);
-            setPromoConfigs([promoConfigData]);
-          } catch {
-            // Configuration peut ne pas exister
-          }
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Erreur lors du chargement des données";
-        setError(message);
-        console.error("Erreur lors du chargement des données:", err);
-      }
-    };
-
-    loadData();
-  }, [currentUser]);
+     loadData();
+   }, [currentUser]);
 
   // Timer pour les sessions
   useEffect(() => {
@@ -765,21 +769,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [coupons]
   );
 
-  // Licences
-  const genererLicence = useCallback(
-    async (salleId: number, code: string) => {
-      try {
-        setError(null);
-        const newLicence = await licenceService.generate(salleId, code);
-        setLicences((prev) => [...prev.filter((l) => l.salleId !== salleId), newLicence]);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Erreur lors de la génération de la licence";
-        setError(message);
-        throw err;
-      }
-    },
-    []
-  );
+// Licences
+   const genererLicence = useCallback(
+     async (salleId: number) => {
+       const newLicence = await licenceService.generate(salleId);
+       // Mettre à jour les salles localement sans refetch
+       setSalles((prev) => prev.map((s) =>
+         s.id === salleId
+           ? { ...s, licences: [...(s.licences || []), newLicence] }
+           : s
+       ));
+       return newLicence;
+     },
+     []
+   );
 
   // Promotions
   const addPromotion = useCallback(

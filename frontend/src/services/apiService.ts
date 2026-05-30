@@ -39,19 +39,19 @@ export const adminService = {
     return response.data.admins || [];
   },
 
-  create: async (admin: any) => {
-    // Transformer les noms de champs pour correspondre au backend
-    const payload = {
-      nom: admin.nom,
-      prenom: admin.prenom,
-      email: admin.email,
-      telephone: admin.phone, // "phone" -> "telephone"
-      salleId: admin.salleId,
-      motDePasse: admin.password || "Admin123!", // "password" -> "motDePasse"
-    };
-    const response = await api.post("/superadmin/admins", payload);
-    return response.data.admin || response.data;
-  },
+create: async (admin: any) => {
+     // Transformer les noms de champs pour correspondre au backend
+     const payload = {
+       nom: admin.nom,
+       prenom: admin.prenom,
+       email: admin.email,
+       telephone: admin.telephone || admin.phone,
+       salleId: admin.salleId,
+       motDePasse: admin.motDePasse,
+     };
+     const response = await api.post("/superadmin/admins", payload);
+     return response.data.admin || response.data;
+   },
 
   update: async (id: number, admin: any) => {
     // Transformer les noms de champs
@@ -274,13 +274,18 @@ export const licenceService = {
     return response.data;
   },
 
-  generate: async (salleId: number, code: string) => {
-    const response = await api.post("/superadmin/licences/generer", {
-      salleId,
-      code,
-    });
-    return response.data;
-  },
+generate: async (salleId: number) => {
+      const response = await api.post("/superadmin/licences/generer", {
+        salleId,
+        validDays: 30,
+      });
+      const data = response.data.licence || response.data;
+      // Sérialiser la date si présent
+      if (data?.fin) {
+        data.fin = new Date(data.fin).toISOString();
+      }
+      return data;
+    },
 
   activate: async (code: string) => {
     const response = await api.post("/licence/activer", { code });

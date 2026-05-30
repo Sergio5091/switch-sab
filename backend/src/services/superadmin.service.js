@@ -8,14 +8,22 @@ export const createSalleService = async ({ nom, pays, ville, quartier, telephone
 }
 
 export const listSallesService = async () => {
-  return prisma.Salle.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      users: true,
-      licences: true,
-    },
-  })
-}
+   const salles = await prisma.Salle.findMany({
+     orderBy: { createdAt: 'desc' },
+     include: {
+       users: true,
+       licences: true,
+     },
+   })
+   // Sérialiser les dates pour JSON
+   return salles.map(salle => ({
+     ...salle,
+     licences: salle.licences?.map((lic) => ({
+       ...lic,
+       fin: lic.fin?.toISOString?.() || lic.fin,
+     })),
+   }))
+ }
 
 export const updateSalleService = async (salleId, payload) => {
   const data = { ...payload }
