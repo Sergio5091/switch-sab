@@ -11,7 +11,7 @@ import {
   updateAdmin,
   resetSalle,
 } from '../controllers/superadmin.controller.js'
-import { changePassword } from '../controllers/AuthController.js'
+import { changePassword } from '../controllers/auth.controller.js'
 
 const router = Router()
 const superadminOnly = [verifyJwt, requireRole(['SUPERADMIN'])]

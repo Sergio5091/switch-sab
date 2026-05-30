@@ -40,12 +40,30 @@ export const adminService = {
   },
 
   create: async (admin: any) => {
-    const response = await api.post("/superadmin/admins", admin);
+    // Transformer les noms de champs pour correspondre au backend
+    const payload = {
+      nom: admin.nom,
+      prenom: admin.prenom,
+      email: admin.email,
+      telephone: admin.phone, // "phone" -> "telephone"
+      salleId: admin.salleId,
+      motDePasse: admin.password || "Admin123!", // "password" -> "motDePasse"
+    };
+    const response = await api.post("/superadmin/admins", payload);
     return response.data.admin || response.data;
   },
 
   update: async (id: number, admin: any) => {
-    const response = await api.patch(`/superadmin/admins/${id}`, admin);
+    // Transformer les noms de champs
+    const payload = {
+      ...(admin.nom && { nom: admin.nom }),
+      ...(admin.prenom && { prenom: admin.prenom }),
+      ...(admin.email && { email: admin.email }),
+      ...(admin.phone && { telephone: admin.phone }),
+      ...(admin.salleId && { salleId: admin.salleId }),
+      ...(admin.actif !== undefined && { actif: admin.actif }),
+    };
+    const response = await api.patch(`/superadmin/admins/${id}`, payload);
     return response.data.admin || response.data;
   },
 

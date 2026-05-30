@@ -14,7 +14,7 @@ export const comparePassword = async (password, hashed) => {
 }
 
 export const loginService = async ({ email, motDePasse }) => {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.User.findUnique({
     where: { email },
   })
   if (!user || !user.active) {
@@ -44,7 +44,7 @@ export const loginService = async ({ email, motDePasse }) => {
 }
 
 export const changePasswordService = async ({ userId, currentPassword, newPassword }) => {
-  const user = await prisma.user.findUnique({ where: { id: userId } })
+  const user = await prisma.User.findUnique({ where: { id: userId } })
   if (!user) {
     throw new Error('Utilisateur introuvable')
   }
@@ -55,7 +55,7 @@ export const changePasswordService = async ({ userId, currentPassword, newPasswo
   }
 
   const motDePasse = await hashPassword(newPassword)
-  await prisma.user.update({
+  await prisma.User.update({
     where: { id: userId },
     data: { motDePasse },
   })

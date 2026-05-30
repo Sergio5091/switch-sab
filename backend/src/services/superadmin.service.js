@@ -2,13 +2,13 @@ import { prisma } from './prismaClient.js'
 import { hashPassword } from './auth.service.js'
 
 export const createSalleService = async ({ nom, pays, ville, quartier, telephone, switchType = 'WIFI', switchConfig = null }) => {
-  return prisma.salle.create({
+  return prisma.Salle.create({
     data: { nom, pays, ville, quartier, telephone, switchType, switchConfig },
   })
 }
 
 export const listSallesService = async () => {
-  return prisma.salle.findMany({
+  return prisma.Salle.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
       users: true,
@@ -20,14 +20,14 @@ export const listSallesService = async () => {
 export const updateSalleService = async (salleId, payload) => {
   const data = { ...payload }
   delete data.id
-  return prisma.salle.update({
+  return prisma.Salle.update({
     where: { id: Number(salleId) },
     data,
   })
 }
 
 export const disableSalleService = async (salleId) => {
-  return prisma.salle.update({
+  return prisma.Salle.update({
     where: { id: Number(salleId) },
     data: { disabled: true },
   })
@@ -36,7 +36,7 @@ export const disableSalleService = async (salleId) => {
 export const createAdminService = async ({ nom, prenom, email, telephone, motDePasse, salleId }) => {
   const pseudo = email ?? telephone
   const hashedPassword = await hashPassword(motDePasse)
-  return prisma.user.create({
+  return prisma.User.create({
     data: {
       pseudo,
       nom,
@@ -52,7 +52,7 @@ export const createAdminService = async ({ nom, prenom, email, telephone, motDeP
 }
 
 export const listAdminsService = async () => {
-  return prisma.user.findMany({
+  return prisma.User.findMany({
     where: { role: 'ADMIN' },
     orderBy: { createdAt: 'desc' },
   })
@@ -69,19 +69,19 @@ export const updateAdminService = async (adminId, payload) => {
   if (data.telephone === undefined) delete data.telephone
   if (data.active === undefined) delete data.active
   if (data.salleId !== undefined) data.salleId = Number(data.salleId)
-  return prisma.user.update({
+  return prisma.User.update({
     where: { id: Number(adminId) },
     data,
   })
 }
 
 export const resetSalleService = async (salleId) => {
-  const salle = await prisma.salle.findUnique({ where: { id: Number(salleId) } })
+  const salle = await prisma.Salle.findUnique({ where: { id: Number(salleId) } })
   if (!salle) {
     throw new Error('Salle introuvable')
   }
 
-  await prisma.session.deleteMany({
+  await prisma.Session.deleteMany({
     where: {
       poste: {
         categorie: {
@@ -91,7 +91,7 @@ export const resetSalleService = async (salleId) => {
     },
   })
 
-  await prisma.credit.deleteMany({
+  await prisma.Credit.deleteMany({
     where: {
       categorie: {
         salleId: Number(salleId),
@@ -99,7 +99,7 @@ export const resetSalleService = async (salleId) => {
     },
   })
 
-  await prisma.transaction.deleteMany({
+  await prisma.Transaction.deleteMany({
     where: {
       client: {
         salleId: Number(salleId),
@@ -107,7 +107,7 @@ export const resetSalleService = async (salleId) => {
     },
   })
 
-  await prisma.licence.deleteMany({ where: { salleId: Number(salleId) } })
+  await prisma.Licence.deleteMany({ where: { salleId: Number(salleId) } })
 
   return { success: true, message: 'Réinstallation de la salle terminée' }
 }

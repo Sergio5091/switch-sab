@@ -44,7 +44,7 @@ const drivers = {
 // ─── RÉCUPÉRER LE TYPE DE SWITCH D'UN POSTE ───────────────────────────────────
 // On lit la BDD : poste → catégorie → salle → switchType
 const getSwitchTypeduPoste = async (posteId) => {
-  const poste = await prisma.poste.findUnique({
+  const poste = await prisma.Poste.findUnique({
     where: { id: posteId },
     include: {
       categorie: {

@@ -69,8 +69,8 @@ export const generateLicence = async (req, res) => {
 
 export const createAdmin = async (req, res) => {
   const { nom, prenom, email, telephone, motDePasse, salleId } = req.body
-  if (!nom || !prenom || !email || !telephone || !motDePasse || !salleId) {
-    return res.status(400).json({ success: false, message: 'Tous les champs admin sont requis' })
+  if (!nom || !prenom || !email || !motDePasse || !salleId) {
+    return res.status(400).json({ success: false, message: 'Nom, prénom, email, mot de passe et salle requis' })
   }
 
   try {

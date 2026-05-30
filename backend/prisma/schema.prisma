@@ -62,7 +62,7 @@ model User {
   email        String?  @unique
   nom          String?
   prenom       String?
-  telephone    String   @unique
+  telephone    String?  @unique
   motDePasse   String
   role         Role     @default(CLIENT)
   estEnfant    Boolean  @default(false)

@@ -25,7 +25,7 @@ async function main() {
   console.log('🌱 Démarrage du seed...')
 
   // ─── SALLE ───────────────────────────────────────────
-  const salle = await prisma.salle.upsert({
+  const salle = await prisma.Salle.upsert({
     where: { id: 1 },
     update: {},
     create: {
@@ -42,7 +42,7 @@ async function main() {
   // ─── USERS ───────────────────────────────────────────
   const hash = (pwd) => bcrypt.hashSync(pwd, 10)
 
-  const superadmin = await prisma.user.upsert({
+  const superadmin = await prisma.User.upsert({
     where: { telephone: '+22900000000' },
     update: {},
     create: {
@@ -55,7 +55,7 @@ async function main() {
     }
   })
 
-  const admin = await prisma.user.upsert({
+  const admin = await prisma.User.upsert({
     where: { telephone: '+22900000001' },
     update: {},
     create: {
@@ -68,7 +68,7 @@ async function main() {
     }
   })
 
-  const gerant1 = await prisma.user.upsert({
+  const gerant1 = await prisma.User.upsert({
     where: { telephone: '+22900000002' },
     update: {},
     create: {
@@ -82,7 +82,7 @@ async function main() {
     }
   })
 
-  const gerant2 = await prisma.user.upsert({
+  const gerant2 = await prisma.User.upsert({
     where: { telephone: '+22900000003' },
     update: {},
     create: {
@@ -97,27 +97,27 @@ async function main() {
   })
 
   const clients = await Promise.all([
-    prisma.user.upsert({
+    prisma.User.upsert({
       where: { telephone: '+22900000004' },
       update: {},
       create: { pseudo: 'kofi', telephone: '+22900000004', motDePasse: hash('client123'), role: 'CLIENT', salleId: salle.id }
     }),
-    prisma.user.upsert({
+    prisma.User.upsert({
       where: { telephone: '+22900000005' },
       update: {},
       create: { pseudo: 'amina', telephone: '+22900000005', motDePasse: hash('client123'), role: 'CLIENT', salleId: salle.id }
     }),
-    prisma.user.upsert({
+    prisma.User.upsert({
       where: { telephone: '+22900000006' },
       update: {},
       create: { pseudo: 'yann', telephone: '+22900000006', motDePasse: hash('client123'), role: 'CLIENT', salleId: salle.id }
     }),
-    prisma.user.upsert({
+    prisma.User.upsert({
       where: { telephone: '+22900000007' },
       update: {},
       create: { pseudo: 'fatou', telephone: '+22900000007', motDePasse: hash('client123'), role: 'CLIENT', salleId: salle.id }
     }),
-    prisma.user.upsert({
+    prisma.User.upsert({
       where: { telephone: '+22900000008' },
       update: {},
       create: { pseudo: 'marcus', telephone: '+22900000008', motDePasse: hash('client123'), role: 'CLIENT', salleId: salle.id }
@@ -159,7 +159,7 @@ async function main() {
 
   const categories = []
   for (const cat of categoriesData) {
-    const created = await prisma.categorie.upsert({
+    const created = await prisma.Categorie.upsert({
       where: { id: categories.length + 1 },
       update: {},
       create: {
@@ -184,7 +184,7 @@ async function main() {
   ]
 
   for (const poste of postesData) {
-    await prisma.poste.upsert({
+    await prisma.Poste.upsert({
       where: { id: postesData.indexOf(poste) + 1 },
       update: {},
       create: poste
@@ -195,7 +195,7 @@ async function main() {
   // ─── CREDITS de test ─────────────────────────────────
   // Donner du crédit PS4 aux 2 premiers clients pour tester
   for (const client of clients.slice(0, 2)) {
-    await prisma.credit.upsert({
+    await prisma.Credit.upsert({
       where: { clientId_categorieId: { clientId: client.id, categorieId: categories[0].id } },
       update: {},
       create: {
@@ -208,7 +208,7 @@ async function main() {
   console.log('✅ Crédits de test attribués à kofi et amina (2H PS4)')
 
   // ─── CONFIG BONUS ────────────────────────────────────
-  await prisma.configBonus.upsert({
+  await prisma.ConfigBonus.upsert({
     where: { id: 1 },
     update: {},
     create: {
