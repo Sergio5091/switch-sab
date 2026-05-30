@@ -10,6 +10,10 @@ export const createSalleService = async ({ nom, pays, ville, quartier, telephone
 export const listSallesService = async () => {
   return prisma.salle.findMany({
     orderBy: { createdAt: 'desc' },
+    include: {
+      users: true,
+      licences: true,
+    },
   })
 }
 

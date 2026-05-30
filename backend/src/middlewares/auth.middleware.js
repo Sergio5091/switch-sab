@@ -19,8 +19,13 @@ export const verifyJwt = async (req, res, next) => {
 
     req.user = {
       id: user.id,
+      pseudo: user.pseudo,
+      email: user.email,
+      telephone: user.telephone,
       role: user.role,
-      salle_id: user.salleId ?? null,
+      salleId: user.salleId ?? null,
+      prenom: user.prenom,
+      nom: user.nom,
     }
 
     next()
