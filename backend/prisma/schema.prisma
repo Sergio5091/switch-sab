@@ -19,7 +19,7 @@ enum LicenceStatus {
 model Salle {
   id           Int       @id @default(autoincrement())
   nom          String
-  proprietaire String
+  proprietaire String?
   telephone    String
   pays         String
   ville        String

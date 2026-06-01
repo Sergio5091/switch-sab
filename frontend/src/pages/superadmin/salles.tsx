@@ -46,15 +46,19 @@ export default function SuperAdminSalles() {
     setOpen(true);
   }
 
-  function onSubmit(values: FormValues) {
-    if (editing) {
-      updateSalle(editing.id, values);
-      toast({ title: "Salle mise à jour" });
-    } else {
-      addSalle(values);
-      toast({ title: "Salle créée" });
+  async function onSubmit(values: FormValues) {
+    try {
+      if (editing) {
+        await updateSalle(editing.id, values);
+        toast({ title: "Salle mise à jour" });
+      } else {
+        await addSalle(values);
+        toast({ title: "Salle créée" });
+      }
+      setOpen(false);
+    } catch (err) {
+      toast({ title: "Erreur", description: err instanceof Error ? err.message : "Une erreur est survenue", variant: "destructive" });
     }
-    setOpen(false);
   }
 
   function confirmDelete() {

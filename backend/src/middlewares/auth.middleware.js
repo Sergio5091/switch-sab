@@ -12,7 +12,7 @@ export const verifyJwt = async (req, res, next) => {
   const token = authHeader.split(' ')[1]
   try {
     const payload = jwt.verify(token, JWT_SECRET)
-    const user = await prisma.User.findUnique({ where: { id: payload.id } })
+    const user = await prisma.user.findUnique({ where: { id: payload.id } })
     if (!user || !user.active) {
       return res.status(401).json({ success: false, message: 'Utilisateur introuvable ou désactivé' })
     }

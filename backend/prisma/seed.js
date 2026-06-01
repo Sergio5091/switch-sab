@@ -1,10 +1,10 @@
 import pkg from '@prisma/client'
+const { PrismaClient } = pkg
 import { PrismaPg } from '@prisma/adapter-pg'
 import bcrypt from 'bcryptjs'
 import { readFileSync } from 'fs'
 import path from 'path'
 
-const { PrismaClient } = pkg
 const envFile = readFileSync(path.join(process.cwd(), '.env'), 'utf-8')
 const env = {}
 envFile.split('\n').forEach(line => {
@@ -37,15 +37,13 @@ async function main() {
     },
   })
 
-  const hash = (pwd) => bcrypt.hashSync(pwd, 10)
-
   const superadmin = await prisma.user.upsert({
     where: { email: 'superadmin@licencemanager.local' },
     update: {},
     create: {
       pseudo: 'superadmin',
       email: 'superadmin@licencemanager.local',
-      motDePasse: hash('superadmin123'),
+      motDePasse: bcrypt.hashSync('superadmin123', 10),
       role: 'SUPERADMIN',
       active: true,
     },

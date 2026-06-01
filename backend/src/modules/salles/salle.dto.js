@@ -22,7 +22,7 @@
  */
 
 export const validateCreateSalle = (payload) => {
-  const required = ['nom', 'proprietaire', 'telephone', 'pays', 'ville', 'quartier', 'machineId']
+  const required = ['nom', 'telephone', 'pays', 'ville', 'quartier', 'machineId']
   return required.every((key) => typeof payload[key] === 'string' && payload[key].trim() !== '')
 }
 
