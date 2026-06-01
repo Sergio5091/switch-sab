@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { prisma } from '../services/prismaClient.js'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'switchsab_jwt_secret'
+const JWT_SECRET = process.env.JWT_SECRET || 'licencemanager_jwt_secret'
 
 export const verifyJwt = async (req, res, next) => {
   const authHeader = req.headers.authorization
@@ -23,9 +23,6 @@ export const verifyJwt = async (req, res, next) => {
       email: user.email,
       telephone: user.telephone,
       role: user.role,
-      salleId: user.salleId ?? null,
-      prenom: user.prenom,
-      nom: user.nom,
     }
 
     next()

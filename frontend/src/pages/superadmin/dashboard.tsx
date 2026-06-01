@@ -1,22 +1,22 @@
 import { useApp } from "@/contexts/AppContext";
 import AdminLayout from "@/layouts/AdminLayout";
-import { Building2, Key, Users, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { Building2, Key, Cpu, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 function LicenceBadge({ days }: { days: number }) {
-   if (!days || days <= 7) return <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-xs">{days ?? 0}j <AlertTriangle size={10} className="inline ml-0.5" /></Badge>;
-   if (days <= 30) return <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-xs">{days}j</Badge>;
-   return <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs">{days}j</Badge>;
+  const WARNING_DAYS = 7
+  if (!days || days <= WARNING_DAYS) return <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-xs">{days ?? 0}j <AlertTriangle size={10} className="inline ml-0.5" /></Badge>;
+  return <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs">{days}j</Badge>;
  }
 
 export default function SuperAdminDashboard() {
-  const { salles, licences, utilisateurs } = useApp();
+  const { salles, licences } = useApp();
 
-  const admins = utilisateurs.filter(u => u.role === "ADMIN");
+  const WARNING_DAYS = 7
   const expiredCount = licences.filter(l => l.daysRemaining <= 0).length;
-  const warnCount = licences.filter(l => l.daysRemaining > 0 && l.daysRemaining <= 30).length;
-  const okCount = licences.filter(l => l.daysRemaining > 30).length;
+  const warnCount = licences.filter(l => l.daysRemaining > 0 && l.daysRemaining <= WARNING_DAYS).length;
+  const okCount = licences.filter(l => l.daysRemaining > WARNING_DAYS).length;
 
   return (
     <AdminLayout>
@@ -29,10 +29,9 @@ export default function SuperAdminDashboard() {
         {/* Stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: "Salles", value: salles.length, icon: Building2, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
-            { label: "Admins", value: admins.length, icon: Users, color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
-            { label: "Licences OK", value: okCount, icon: CheckCircle2, color: "text-green-400", bg: "bg-green-500/10 border-green-500/20" },
-            { label: "Alertes licence", value: warnCount + expiredCount, icon: AlertTriangle, color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
+              { label: "Salles", value: salles.length, icon: Building2, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
+              { label: "Licences OK", value: okCount, icon: CheckCircle2, color: "text-green-400", bg: "bg-green-500/10 border-green-500/20" },
+              { label: "Alertes licence", value: warnCount + expiredCount, icon: AlertTriangle, color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
           ].map(stat => (
             <div key={stat.label} className={cn("rounded-xl border p-4", stat.bg)}>
               <div className="flex items-center justify-between mb-2">
@@ -52,7 +51,6 @@ export default function SuperAdminDashboard() {
           <div className="divide-y divide-border">
 {salles.map(salle => {
                const lic = licences.find(l => l.salleId === salle.id);
-               const adminUser = salle.users?.find(u => u.role === "ADMIN");
                return (
                  <div key={salle.id} className="flex items-center gap-4 px-5 py-4" data-testid={`row-salle-${salle.id}`}>
                    <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
@@ -60,14 +58,14 @@ export default function SuperAdminDashboard() {
                    </div>
                    <div className="flex-1 min-w-0">
                      <div className="font-medium text-foreground text-sm">{salle.nom}</div>
-                     <div className="text-xs text-muted-foreground">{salle.ville}, {salle.pays} — {adminUser?.prenom} {adminUser?.nom}</div>
+                     <div className="text-xs text-muted-foreground">{salle.ville}, {salle.pays}</div>
                    </div>
                    <div className="flex items-center gap-2 flex-shrink-0">
                      {lic ? (
                        <>
                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
                            <Clock size={11} />
-                           <span>Expire {lic.expiresAt}</span>
+                          <span>Expire {new Date(lic.expiresAt).toLocaleDateString()}</span>
                          </div>
                          <LicenceBadge days={lic.daysRemaining} />
                        </>

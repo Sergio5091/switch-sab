@@ -18,6 +18,7 @@ const schema = z.object({
   ville: z.string().min(2, "Ville requise"),
   quartier: z.string().min(2, "Quartier requis"),
   telephone: z.string().min(8, "Téléphone requis"),
+  machineId: z.string().min(2, "Machine ID requis"),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -30,27 +31,27 @@ export default function SuperAdminSalles() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "" },
+    defaultValues: { nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "", machineId: "" },
   });
 
   function openCreate() {
     setEditing(null);
-    form.reset({ nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "" });
+    form.reset({ nom: "", pays: "Bénin", ville: "", quartier: "", telephone: "", machineId: "" });
     setOpen(true);
   }
 
   function openEdit(s: Salle) {
     setEditing(s);
-    form.reset({ nom: s.nom, pays: s.pays, ville: s.ville, quartier: s.quartier, telephone: s.telephone });
+    form.reset({ nom: s.nom, pays: s.pays, ville: s.ville, quartier: s.quartier, telephone: s.telephone, machineId: s.machineId });
     setOpen(true);
   }
 
   function onSubmit(values: FormValues) {
     if (editing) {
-      updateSalle(editing.id, { ...values, licenceExpiry: editing.licenceExpiry, adminId: editing.adminId });
+      updateSalle(editing.id, values);
       toast({ title: "Salle mise à jour" });
     } else {
-      addSalle({ ...values, licenceExpiry: "", adminId: 0 });
+      addSalle(values);
       toast({ title: "Salle créée" });
     }
     setOpen(false);
@@ -94,11 +95,14 @@ export default function SuperAdminSalles() {
                       </span>
                     </div>
                   </div>
-                  {lic && (
-                    <Badge className={lic.joursRestants <= 7 ? "bg-destructive/10 text-destructive border-destructive/20 text-xs" : lic.joursRestants <= 30 ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-xs" : "bg-green-500/10 text-green-400 border-green-500/20 text-xs"}>
-                      {lic.joursRestants}j restants
-                    </Badge>
-                  )}
+                  {lic && (() => {
+                    const days = lic.daysRemaining ?? 0;
+                    return (
+                      <Badge className={days <= 7 ? "bg-destructive/10 text-destructive border-destructive/20 text-xs" : days <= 30 ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-xs" : "bg-green-500/10 text-green-400 border-green-500/20 text-xs"}>
+                        {days}j restants
+                      </Badge>
+                    );
+                  })()}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Button variant="ghost" size="sm" onClick={() => openEdit(salle)} data-testid={`button-edit-salle-${salle.id}`}>
                       <Pencil size={14} />
@@ -121,11 +125,11 @@ export default function SuperAdminSalles() {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-                {["nom", "pays", "ville", "quartier", "telephone"].map(name => (
+                {["nom", "pays", "ville", "quartier", "telephone", "machineId"].map(name => (
                   <FormField key={name} control={form.control} name={name as keyof FormValues}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="capitalize">{name === "telephone" ? "Téléphone" : name.charAt(0).toUpperCase() + name.slice(1)}</FormLabel>
+                        <FormLabel className="capitalize">{name === "telephone" ? "Téléphone" : name === "machineId" ? "Machine ID" : name.charAt(0).toUpperCase() + name.slice(1)}</FormLabel>
                         <FormControl><Input {...field} data-testid={`input-${name}`} /></FormControl>
                         <FormMessage />
                       </FormItem>

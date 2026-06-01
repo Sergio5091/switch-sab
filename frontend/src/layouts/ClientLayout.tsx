@@ -78,17 +78,17 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           {tabs.map(tab => {
             const active = location.startsWith(tab.href);
             return (
-              <Link key={tab.href} href={tab.href}>
-                <a
-                  data-testid={`tab-${tab.href.split("/").pop()}`}
-                  className={cn(
-                    "flex-1 flex flex-col items-center gap-1 py-2.5 px-1 transition-colors min-w-0",
-                    active ? "text-primary" : "text-muted-foreground"
-                  )}
-                >
-                  <tab.icon size={18} />
-                  <span className="text-[10px] font-medium truncate">{tab.label}</span>
-                </a>
+              <Link
+                key={tab.href}
+                href={tab.href}
+                data-testid={`tab-${tab.href.split("/").pop()}`}
+                className={cn(
+                  "flex-1 flex flex-col items-center gap-1 py-2.5 px-1 transition-colors min-w-0",
+                  active ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                <tab.icon size={18} />
+                <span className="text-[10px] font-medium truncate">{tab.label}</span>
               </Link>
             );
           })}

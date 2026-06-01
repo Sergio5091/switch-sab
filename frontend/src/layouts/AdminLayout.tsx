@@ -4,9 +4,10 @@ import { useApp } from "@/contexts/AppContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import {
-  LayoutDashboard, Building2, Users, Shield, Key, Monitor,
+  type LucideProps,
+  LayoutDashboard, Building2, Users, Key, Monitor,
   Tag, DollarSign, Gift, Megaphone, BarChart2, Settings,
-  Ticket, LogOut, Menu, X, Gamepad2, Clock, FileText,
+  Ticket, LogOut, Menu, X, Gamepad2, Clock, FileText, Cpu,
   ChevronRight, UserCheck, Zap, Sun, Moon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,35 +15,15 @@ import { cn } from "@/lib/utils";
 interface NavItem {
   href: string;
   label: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<LucideProps>;
 }
 
 const superAdminNav: NavItem[] = [
   { href: "/superadmin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/superadmin/salles", label: "Salles", icon: Building2 },
-  { href: "/superadmin/admins", label: "Admins", icon: Shield },
   { href: "/superadmin/licences", label: "Licences", icon: Key },
 ];
 
-const adminNav: NavItem[] = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/categories", label: "Catégories", icon: Tag },
-  { href: "/admin/postes", label: "Postes TV", icon: Monitor },
-  { href: "/admin/gerants", label: "Gérants", icon: UserCheck },
-  { href: "/admin/bonus", label: "Bonus", icon: Gift },
-  { href: "/admin/promo", label: "Parrainage", icon: Zap },
-  { href: "/admin/coupons", label: "Coupons", icon: Ticket },
-  { href: "/admin/promotions", label: "Promotions", icon: Megaphone },
-  { href: "/admin/rapports", label: "Rapports", icon: BarChart2 },
-];
-
-const gerantNav: NavItem[] = [
-  { href: "/gerant/dashboard", label: "Postes", icon: Gamepad2 },
-  { href: "/gerant/session/new", label: "Nouvelle session", icon: Clock },
-  { href: "/gerant/clients", label: "Clients", icon: Users },
-  { href: "/gerant/recharges", label: "Recharges", icon: DollarSign },
-  { href: "/gerant/rapport", label: "Rapport du jour", icon: FileText },
-];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, logout } = useApp();
@@ -62,9 +43,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  const nav = currentUser?.role === "SUPERADMIN" ? superAdminNav
-    : currentUser?.role === "ADMIN" ? adminNav
-    : gerantNav;
+  // Use the superadmin navigation for this simplified app.
+  const nav = superAdminNav;
 
   const roleLabel = currentUser?.role === "SUPERADMIN" ? "Super Admin"
     : currentUser?.role === "ADMIN" ? "Admin"
@@ -118,21 +98,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {nav.map(item => {
             const active = location.startsWith(item.href);
             return (
-              <Link key={item.href} href={item.href}>
-                <a
-                  data-testid={`nav-${item.href.split("/").pop()}`}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-colors",
-                    active
-                      ? "bg-primary/10 text-primary border border-primary/20"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
-                  )}
-                >
-                  <item.icon size={16} className={active ? "text-primary" : "text-muted-foreground"} />
-                  {item.label}
-                  {active && <ChevronRight size={14} className="ml-auto text-primary" />}
-                </a>
+              <Link
+                key={item.href}
+                href={item.href}
+                data-testid={`nav-${item.href.split("/").pop()}`}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-colors",
+                  active
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
+                )}
+              >
+                <item.icon size={16} className={active ? "text-primary" : "text-muted-foreground"} />
+                {item.label}
+                {active && <ChevronRight size={14} className="ml-auto text-primary" />}
               </Link>
             );
           })}

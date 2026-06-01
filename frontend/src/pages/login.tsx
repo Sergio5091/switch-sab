@@ -172,11 +172,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   if (currentUser) {
-    const dest = currentUser.role === "SUPERADMIN" ? "/superadmin/dashboard"
-      : currentUser.role === "ADMIN" ? "/admin/dashboard"
-      : currentUser.role === "GERANT" ? "/gerant/dashboard"
-      : "/client/home";
-    setLocation(dest);
+    // Le seul tableau de bord actif dans la nouvelle application est celui du Super Admin.
+    setLocation("/superadmin/dashboard");
     return null;
   }
 
@@ -197,14 +194,8 @@ export default function LoginPage() {
       }
       toast({ title: "Connexion réussie" });
       
-      // Redirection immédiate basée sur le rôle retourné
-      const dest = user.role === "SUPERADMIN" ? "/superadmin/dashboard"
-        : user.role === "ADMIN" ? "/admin/dashboard"
-        : user.role === "GERANT" ? "/gerant/dashboard"
-        : "/client/home";
-      console.log("🔴 Tentative de redirection vers:", dest, "pour l'utilisateur:", user);
-      setLocation(dest);
-      console.log("🔴 setLocation appelée");
+      // Le seul tableau de bord actif dans la nouvelle application est celui du Super Admin.
+      setLocation("/superadmin/dashboard");
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : "Erreur de connexion");

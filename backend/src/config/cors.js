@@ -1,6 +1,6 @@
 /**
  * Configuration CORS centralisée.
- * Utilisée par Express (middleware cors) et Socket.io.
+ * Utilisée par Express (middleware cors).
  */
 
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
