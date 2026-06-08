@@ -19,10 +19,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 const DEMO_ACCOUNTS = [
-  { label: "Super Admin", email: "superadmin@switchsab.local", color: "text-orange-500 dark:text-orange-400", password: "super123" },
-  { label: "Admin", email: "admin@switchsab.local", color: "text-blue-500 dark:text-blue-400", password: "admin123" },
-  { label: "Gérant", email: "gerant1@switchsab.local", color: "text-green-500 dark:text-green-400", password: "gerant123" },
-  { label: "Client", email: "kofi@switchsab.local", color: "text-purple-500 dark:text-purple-400", password: "client123" },
+  { label: "Super Admin", email: "superadmin@licencemanager.local", color: "text-orange-500 dark:text-orange-400", password: "superadmin123" },
 ];
 
 // Floating particle dot
