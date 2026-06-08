@@ -2,25 +2,44 @@ import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 
-const privateKeyPath = process.env.LICENCE_PRIVATE_KEY_PATH || path.join(process.cwd(), 'private.key')
-const publicKeyPath = process.env.LICENCE_PUBLIC_KEY_PATH || path.join(process.cwd(), 'public.key')
+/**
+ * Charge une clé RSA.
+ * En production : depuis une variable d'environnement encodée en base64.
+ * En local      : depuis un fichier .pem.
+ *
+ * Pour encoder ta clé en base64 (à faire une seule fois) :
+ *   Windows PowerShell :
+ *     [Convert]::ToBase64String([IO.File]::ReadAllBytes("backend\keys\private-key.pem"))
+ *   Git Bash / Linux :
+ *     base64 -w 0 backend/keys/private-key.pem
+ */
 
-console.log('PrivateKey', privateKeyPath)
-console.log('PublicKey', publicKeyPath)
-
-let privateKey
-let publicKey
-
-try {
-  if (fs.existsSync(privateKeyPath)) {
-    privateKey = fs.readFileSync(privateKeyPath, 'utf-8')
+const loadKey = (envVarBase64, filePath) => {
+  // Priorité 1 — variable d'env base64 (production Render)
+  if (process.env[envVarBase64]) {
+    return Buffer.from(process.env[envVarBase64], 'base64').toString('utf-8')
   }
-  if (fs.existsSync(publicKeyPath)) {
-    publicKey = fs.readFileSync(publicKeyPath, 'utf-8')
+
+  // Priorité 2 — fichier local (développement)
+  const resolvedPath = path.isAbsolute(filePath)
+    ? filePath
+    : path.join(process.cwd(), filePath)
+
+  if (fs.existsSync(resolvedPath)) {
+    return fs.readFileSync(resolvedPath, 'utf-8')
   }
-} catch (error) {
-  console.warn('Impossible de charger les clés de licence:', error.message)
+
+  return null
 }
+
+const privateKeyPath = process.env.LICENCE_PRIVATE_KEY_PATH || './keys/private-key.pem'
+const publicKeyPath  = process.env.LICENCE_PUBLIC_KEY_PATH  || './keys/public-key.pem'
+
+const privateKey = loadKey('LICENCE_PRIVATE_KEY_PEM', privateKeyPath)
+const publicKey  = loadKey('LICENCE_PUBLIC_KEY_PEM',  publicKeyPath)
+
+if (!privateKey) console.warn('[CRYPTO] ⚠️  Clé privée introuvable — génération de licence désactivée')
+if (!publicKey)  console.warn('[CRYPTO] ⚠️  Clé publique introuvable — vérification de licence désactivée')
 
 export const getPrivateKey = () => {
   if (!privateKey) throw new Error('Clé privée de licence introuvable')
