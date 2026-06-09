@@ -5,10 +5,30 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import {
   type LucideProps,
-  LayoutDashboard, Building2, Users, Key, Monitor,
-  Tag, DollarSign, Gift, Megaphone, BarChart2, Settings,
-  Ticket, LogOut, Menu, X, Gamepad2, Clock, FileText, Cpu,
-  ChevronRight, UserCheck, Zap, Sun, Moon
+  LayoutDashboard,
+  Building2,
+  Users,
+  Key,
+  Monitor,
+  Tag,
+  DollarSign,
+  Gift,
+  Megaphone,
+  BarChart2,
+  Settings,
+  Ticket,
+  LogOut,
+  Menu,
+  X,
+  Gamepad2,
+  Clock,
+  FileText,
+  Cpu,
+  ChevronRight,
+  UserCheck,
+  Zap,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,8 +44,11 @@ const superAdminNav: NavItem[] = [
   { href: "/superadmin/licences", label: "Licences", icon: Key },
 ];
 
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { currentUser, logout } = useApp();
   const { theme, toggleTheme } = useTheme();
   const [location, setLocation] = useLocation();
@@ -46,13 +69,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Use the superadmin navigation for this simplified app.
   const nav = superAdminNav;
 
-  const roleLabel = currentUser?.role === "SUPERADMIN" ? "Super Admin"
-    : currentUser?.role === "ADMIN" ? "Admin"
-    : "Gérant";
+  const roleLabel =
+    currentUser?.role === "SUPERADMIN"
+      ? "Super Admin"
+      : currentUser?.role === "ADMIN"
+        ? "Admin"
+        : "Gérant";
 
-  const roleColor = currentUser?.role === "SUPERADMIN" ? "text-orange-400"
-    : currentUser?.role === "ADMIN" ? "text-blue-400"
-    : "text-green-400";
+  const roleColor =
+    currentUser?.role === "SUPERADMIN"
+      ? "text-orange-400"
+      : currentUser?.role === "ADMIN"
+        ? "text-blue-400"
+        : "text-green-400";
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -68,19 +97,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside
         className={cn(
           "fixed lg:relative inset-y-0 left-0 z-40 flex flex-col w-64 bg-sidebar border-r border-sidebar-border transition-transform duration-200",
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <Gamepad2 size={18} className="text-white" />
-          </div>
+          <img
+            src="/Image-removebg-preview.png"
+            alt="Logo"
+            className="w-9 h-9 rounded-lg object-cover flex-shrink-0 shadow-lg"
+          />
+
           <div>
-            <div className="font-bold text-foreground text-sm tracking-wide">SWITCH SAB</div>
-            <div className={cn("text-xs font-medium", roleColor)}>{roleLabel}</div>
+            <div className="font-bold text-foreground text-sm tracking-wide">
+              SWITCH SAB
+            </div>
+            <div className={cn("text-xs font-medium", roleColor)}>
+              {roleLabel}
+            </div>
           </div>
-          <button className="ml-auto lg:hidden text-muted-foreground" onClick={() => setOpen(false)}>
+
+          <button
+            className="ml-auto lg:hidden text-muted-foreground"
+            onClick={() => setOpen(false)}
+          >
             <X size={18} />
           </button>
         </div>
@@ -88,14 +128,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Salle info */}
         {currentUser && (
           <div className="px-5 py-3 border-b border-sidebar-border bg-sidebar-accent/30">
-            <div className="text-xs text-muted-foreground">Connecté en tant que</div>
-            <div className="text-sm font-medium text-foreground truncate">{currentUser.prenom} {currentUser.nom}</div>
+            <div className="text-xs text-muted-foreground">
+              Connecté en tant que
+            </div>
+            <div className="text-sm font-medium text-foreground truncate">
+              {currentUser.prenom} {currentUser.nom}
+            </div>
           </div>
         )}
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 px-3">
-          {nav.map(item => {
+          {nav.map((item) => {
             const active = location.startsWith(item.href);
             return (
               <Link
@@ -107,12 +151,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-colors",
                   active
                     ? "bg-primary/10 text-primary border border-primary/20"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground",
                 )}
               >
-                <item.icon size={16} className={active ? "text-primary" : "text-muted-foreground"} />
+                <item.icon
+                  size={16}
+                  className={active ? "text-primary" : "text-muted-foreground"}
+                />
                 {item.label}
-                {active && <ChevronRight size={14} className="ml-auto text-primary" />}
+                {active && (
+                  <ChevronRight size={14} className="ml-auto text-primary" />
+                )}
               </Link>
             );
           })}
@@ -161,9 +210,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
