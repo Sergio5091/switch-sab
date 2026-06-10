@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useApp, Salle } from "@/contexts/AppContext";
+import { useApp, type Salle } from "@/contexts/AppContext";
 import AdminLayout from "@/layouts/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
