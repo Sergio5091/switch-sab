@@ -1,6 +1,12 @@
 import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname  = path.dirname(__filename)
+// Racine du projet backend = deux niveaux au-dessus de src/utils/
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..')
 
 /**
  * Charge une clé RSA.
@@ -19,36 +25,32 @@ const loadKey = (envVarBase64, filePath) => {
   if (process.env[envVarBase64]) {
     return Buffer.from(process.env[envVarBase64], 'base64').toString('utf-8')
   }
-
-  // Priorité 2 — fichier local (développement ou fichier commité)
+  // Priorité 2 — fichier local
   if (fs.existsSync(filePath)) {
     return fs.readFileSync(filePath, 'utf-8')
   }
-
   return null
 }
 
 const privateKeyPath = process.env.LICENCE_PRIVATE_KEY_PATH || './keys/private-key.pem'
 const publicKeyPath  = process.env.LICENCE_PUBLIC_KEY_PATH  || './keys/public-key.pem'
 
-// Résoudre les chemins absolus
+// Résoudre le chemin depuis PROJECT_ROOT (fiable quel que soit le cwd)
 const resolveKeyPath = (keyPath) => {
   if (path.isAbsolute(keyPath)) return keyPath
-  // Essayer depuis process.cwd()
-  const fromCwd = path.join(process.cwd(), keyPath)
-  if (fs.existsSync(fromCwd)) return fromCwd
-  // Essayer depuis le dossier du fichier courant
-  const fromDirname = path.join(path.dirname(new URL(import.meta.url).pathname), '..', '..', keyPath)
-  if (fs.existsSync(fromDirname)) return fromDirname
-  return fromCwd // retourner le chemin par défaut même s'il n'existe pas
+  // Depuis la racine du projet backend
+  const fromRoot = path.join(PROJECT_ROOT, keyPath)
+  if (fs.existsSync(fromRoot)) return fromRoot
+  // Fallback : depuis process.cwd()
+  return path.join(process.cwd(), keyPath)
 }
 
 const resolvedPrivatePath = resolveKeyPath(privateKeyPath)
 const resolvedPublicPath  = resolveKeyPath(publicKeyPath)
 
-console.log('[CRYPTO] cwd:', process.cwd())
+console.log('[CRYPTO] PROJECT_ROOT:', PROJECT_ROOT)
 console.log('[CRYPTO] private key path:', resolvedPrivatePath, '| exists:', fs.existsSync(resolvedPrivatePath))
-console.log('[CRYPTO] public key path:', resolvedPublicPath, '| exists:', fs.existsSync(resolvedPublicPath))
+console.log('[CRYPTO] public key path:', resolvedPublicPath,  '| exists:', fs.existsSync(resolvedPublicPath))
 
 const privateKey = loadKey('LICENCE_PRIVATE_KEY_PEM', resolvedPrivatePath)
 const publicKey  = loadKey('LICENCE_PUBLIC_KEY_PEM',  resolvedPublicPath)
@@ -66,18 +68,22 @@ export const getPublicKey = () => {
   return publicKey
 }
 
+// Format pipe-séparé — identique au format de vérification du client
+const buildSignatureData = (payload) =>
+  `${payload.licenceId}|${payload.salleId}|${payload.machineId}|${payload.issuedAt}|${payload.expiresAt}`
+
 export const signLicencePayload = (payload) => {
   const key = getPrivateKey()
-  const signer = crypto.createSign('RSA-SHA256')
-  signer.update(JSON.stringify(payload))
+  const signer = crypto.createSign('SHA256')
+  signer.update(buildSignatureData(payload))
   signer.end()
   return signer.sign(key, 'base64')
 }
 
 export const verifyLicencePayload = (payload, signature) => {
   const key = getPublicKey()
-  const verifier = crypto.createVerify('RSA-SHA256')
-  verifier.update(JSON.stringify(payload))
+  const verifier = crypto.createVerify('SHA256')
+  verifier.update(buildSignatureData(payload))
   verifier.end()
   return verifier.verify(key, signature, 'base64')
 }

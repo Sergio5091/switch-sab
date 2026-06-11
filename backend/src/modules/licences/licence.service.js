@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { createLicence, findLicenceById, findAllLicences, updateLicence } from './licence.repository.js'
-import { findSalleById } from '../salles/salle.repository.js'
+import { findSalleById, findSalleByMachineId } from '../salles/salle.repository.js'
 import { signLicencePayload } from '../../utils/crypto.js'
 
 const buildLicencePayload = ({ licenceId, salleId, machineId, issuedAt, expiresAt }) => ({
@@ -11,10 +11,15 @@ const buildLicencePayload = ({ licenceId, salleId, machineId, issuedAt, expiresA
   expiresAt: expiresAt.toISOString(),
 })
 
-export const generateLicenceService = async ({ salleId, validDays }) => {
-  const salle = await findSalleById(salleId)
-  if (!salle) {
-    throw new Error('Salle introuvable')
+export const generateLicenceService = async ({ salleId, machineId, validDays }) => {
+  let salle
+
+  if (machineId) {
+    salle = await findSalleByMachineId(machineId)
+    if (!salle) throw new Error(`Aucune salle trouvée pour machineId "${machineId}"`)
+  } else {
+    salle = await findSalleById(salleId)
+    if (!salle) throw new Error('Salle introuvable')
   }
 
   const issuedAt = new Date()

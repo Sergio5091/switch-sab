@@ -8,6 +8,11 @@ export const findSalleById = async (id) => {
   return prisma.salle.findUnique({ where: { id: Number(id) } })
 }
 
+export const findSalleByMachineId = async (machineId) => {
+  return prisma.salle.findUnique({ where: { machineId } })
+}
+
+
 export const findAllSalles = async () => {
   return prisma.salle.findMany({ where: { disabled: false }, orderBy: { createdAt: 'desc' } })
 }
