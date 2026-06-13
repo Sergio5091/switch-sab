@@ -4,6 +4,6 @@ node_modules
 
 /generated/prisma
 
-# Clés RSA — ne jamais commiter en production
-# keys/
-*.key
+# # Clés RSA — ne jamais commiter en production
+# # keys/
+# *.key
