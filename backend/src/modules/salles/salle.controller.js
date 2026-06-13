@@ -2,7 +2,13 @@ import { createSalleService, getAllSallesService, getSalleByIdService, updateSal
 import { validateCreateSalle, validateUpdateSalle } from './salle.dto.js'
 
 export const createSalle = async (req, res) => {
+  // Log pour débogage
+  console.log('📦 Body reçu:', JSON.stringify(req.body, null, 2))
+  console.log('🔑 machineId reçu:', req.body.machineId)
+  console.log('📋 Type de machineId:', typeof req.body.machineId)
+  
   if (!validateCreateSalle(req.body)) {
+    console.log('❌ Validation échouée')
     return res.status(400).json({ success: false, message: 'Payload de salle invalide' })
   }
 
@@ -10,6 +16,7 @@ export const createSalle = async (req, res) => {
     const salle = await createSalleService(req.body)
     return res.status(201).json({ success: true, salle })
   } catch (error) {
+    console.log('❌ Erreur lors de la création:', error)
     return res.status(500).json({ success: false, message: error.message })
   }
 }

@@ -9,7 +9,7 @@
     "build": "prisma generate",
     "start": "node server.js",
     "seed": "node prisma/seed.js",
-    "migrate": "npx prisma migrate deploy"
+    "migrate": "npx prisma migrate dev"
   },
   "keywords": [],
   "author": "",

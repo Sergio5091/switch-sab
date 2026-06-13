@@ -8,7 +8,7 @@ CREATE TYPE "LicenceStatus" AS ENUM ('ACTIVE', 'EXPIRED', 'REVOKED');
 CREATE TABLE "Salle" (
     "id" SERIAL NOT NULL,
     "nom" TEXT NOT NULL,
-    "proprietaire" TEXT NOT NULL,
+    "proprietaire" TEXT,
     "telephone" TEXT NOT NULL,
     "pays" TEXT NOT NULL,
     "ville" TEXT NOT NULL,

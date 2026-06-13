@@ -1,6 +1,7 @@
 import { createSalle, findSalleById, findAllSalles, updateSalle, softDeleteSalle } from './salle.repository.js'
 
 export const createSalleService = async (payload) => {
+  console.log('🏢 Service - Création salle avec payload:', JSON.stringify(payload, null, 2))
   return createSalle(payload)
 }
 
