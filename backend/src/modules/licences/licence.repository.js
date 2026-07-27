@@ -14,7 +14,8 @@ export const findLicenceByDatabaseId = async (id) => {
 
 export const findAllLicences = async (filters = {}) => {
   const where = {}
-  if (filters.salleId) where.salleId = Number(filters.salleId)
+  if (filters.machineId) where.machineId = String(filters.machineId)
+  if (filters.nomSalle)  where.nomSalle  = { contains: filters.nomSalle, mode: 'insensitive' }
   return prisma.licence.findMany({ where, orderBy: { issuedAt: 'desc' } })
 }
 

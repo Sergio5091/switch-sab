@@ -1,4 +1,4 @@
-import { createSalle, findSalleById, findAllSalles, updateSalle, softDeleteSalle } from './salle.repository.js'
+import { createSalle, findSalleById, findAllSalles, updateSalle, hardDeleteSalle } from './salle.repository.js'
 
 export const createSalleService = async (payload) => {
   console.log('🏢 Service - Création salle avec payload:', JSON.stringify(payload, null, 2))
@@ -18,5 +18,5 @@ export const updateSalleService = async (id, payload) => {
 }
 
 export const deleteSalleService = async (id) => {
-  return softDeleteSalle(id)
+  return hardDeleteSalle(id)
 }

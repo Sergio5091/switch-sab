@@ -21,6 +21,11 @@ export const updateSalle = async (id, data) => {
   return prisma.salle.update({ where: { id: Number(id) }, data })
 }
 
-export const softDeleteSalle = async (id) => {
-  return prisma.salle.update({ where: { id: Number(id) }, data: { disabled: true } })
+export const hardDeleteSalle = async (id) => {
+  // Supprime d'abord les licences liées par machineId
+  const salle = await prisma.salle.findUnique({ where: { id: Number(id) } })
+  if (salle) {
+    await prisma.licence.deleteMany({ where: { machineId: salle.machineId } })
+  }
+  return prisma.salle.delete({ where: { id: Number(id) } })
 }

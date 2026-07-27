@@ -3,9 +3,9 @@ import { createLicence, findLicenceById, findAllLicences, updateLicence } from '
 import { findSalleById, findSalleByMachineId } from '../salles/salle.repository.js'
 import { signLicencePayload } from '../../utils/crypto.js'
 
-const buildLicencePayload = ({ licenceId, salleId, machineId, issuedAt, expiresAt }) => ({
+const buildLicencePayload = ({ licenceId, nomSalle, machineId, issuedAt, expiresAt }) => ({
   licenceId,
-  salleId,
+  nomSalle,
   machineId,
   issuedAt: issuedAt.toISOString(),
   expiresAt: expiresAt.toISOString(),
@@ -22,12 +22,13 @@ export const generateLicenceService = async ({ salleId, machineId, validDays }) 
     if (!salle) throw new Error('Salle introuvable')
   }
 
-  const issuedAt = new Date()
+  const issuedAt  = new Date()
   const expiresAt = new Date(Date.now() + validDays * 24 * 60 * 60 * 1000)
   const licenceId = `LIC-${randomUUID()}`
-  const payload = buildLicencePayload({
+
+  const payload   = buildLicencePayload({
     licenceId,
-    salleId: salle.id,
+    nomSalle:  salle.nom,
     machineId: salle.machineId,
     issuedAt,
     expiresAt,
@@ -36,11 +37,11 @@ export const generateLicenceService = async ({ salleId, machineId, validDays }) 
 
   return createLicence({
     licenceId,
-    salleId: salle.id,
+    nomSalle:  salle.nom,
     machineId: salle.machineId,
     issuedAt,
     expiresAt,
-    status: 'ACTIVE',
+    status:    'ACTIVE',
     signature,
   })
 }
@@ -55,21 +56,18 @@ export const listLicencesService = async (filters) => {
 
 export const renewLicenceService = async ({ licenceId, validDays }) => {
   const existing = await findLicenceById(licenceId)
-  if (!existing) {
-    throw new Error('Licence introuvable')
-  }
-  if (existing.status === 'REVOKED') {
-    throw new Error('Impossible de renouveler une licence révoquée')
-  }
+  if (!existing) throw new Error('Licence introuvable')
+  if (existing.status === 'REVOKED') throw new Error('Impossible de renouveler une licence révoquée')
 
   await updateLicence(licenceId, { status: 'EXPIRED' })
 
-  const issuedAt = new Date()
+  const issuedAt  = new Date()
   const expiresAt = new Date(Date.now() + validDays * 24 * 60 * 60 * 1000)
   const newLicenceId = `LIC-${randomUUID()}`
-  const payload = buildLicencePayload({
+
+  const payload   = buildLicencePayload({
     licenceId: newLicenceId,
-    salleId: existing.salleId,
+    nomSalle:  existing.nomSalle,
     machineId: existing.machineId,
     issuedAt,
     expiresAt,
@@ -78,38 +76,32 @@ export const renewLicenceService = async ({ licenceId, validDays }) => {
 
   return createLicence({
     licenceId: newLicenceId,
-    salleId: existing.salleId,
+    nomSalle:  existing.nomSalle,
     machineId: existing.machineId,
     issuedAt,
     expiresAt,
-    status: 'ACTIVE',
+    status:    'ACTIVE',
     signature,
   })
 }
 
 export const revokeLicenceService = async (licenceId) => {
   const existing = await findLicenceById(licenceId)
-  if (!existing) {
-    throw new Error('Licence introuvable')
-  }
-  if (existing.status === 'REVOKED') {
-    throw new Error('Licence déjà révoquée')
-  }
+  if (!existing) throw new Error('Licence introuvable')
+  if (existing.status === 'REVOKED') throw new Error('Licence déjà révoquée')
   return updateLicence(licenceId, { status: 'REVOKED' })
 }
 
 export const exportLicenceService = async (licenceId) => {
   const licence = await findLicenceById(licenceId)
-  if (!licence) {
-    throw new Error('Licence introuvable')
-  }
+  if (!licence) throw new Error('Licence introuvable')
   return {
     licenceId: licence.licenceId,
-    salleId: licence.salleId,
+    nomSalle:  licence.nomSalle,
     machineId: licence.machineId,
-    issuedAt: licence.issuedAt.toISOString(),
+    issuedAt:  licence.issuedAt.toISOString(),
     expiresAt: licence.expiresAt.toISOString(),
-    status: licence.status,
+    status:    licence.status,
     signature: licence.signature,
   }
 }

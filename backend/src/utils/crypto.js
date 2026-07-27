@@ -70,7 +70,7 @@ export const getPublicKey = () => {
 
 // Format pipe-séparé — identique au format de vérification du client
 const buildSignatureData = (payload) =>
-  `${payload.licenceId}|${payload.salleId}|${payload.machineId}|${payload.issuedAt}|${payload.expiresAt}`
+  `${payload.licenceId}|${payload.nomSalle}|${payload.machineId}|${payload.issuedAt}|${payload.expiresAt}`
 
 export const signLicencePayload = (payload) => {
   const key = getPrivateKey()

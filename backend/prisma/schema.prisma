@@ -27,14 +27,12 @@ model Salle {
   machineId    String    @unique
   disabled     Boolean   @default(false)
   createdAt    DateTime  @default(now())
-
-  licences Licence[]
 }
 
 model Licence {
   id         Int           @id @default(autoincrement())
   licenceId  String        @unique
-  salleId    Int
+  nomSalle   String
   machineId  String
   issuedAt   DateTime      @default(now())
   expiresAt  DateTime
@@ -42,8 +40,6 @@ model Licence {
   signature  String
   revokedAt  DateTime?
   createdAt  DateTime      @default(now())
-
-  salle Salle @relation(fields: [salleId], references: [id])
 }
 
 model User {
